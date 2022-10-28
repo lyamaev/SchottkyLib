@@ -1,1 +1,1 @@
-# schottky_model
+# Schottky model of real hyperelliptic curves
