@@ -11,7 +11,7 @@ integer, parameter :: quadruplePrecision = selected_real_kind(33)
 ! Global precision of real and complex numbers.
 integer, parameter :: precision = doublePrecision  
 
-real(precision), parameter :: pi = 3.14159265358979323846264338327950288_precision
+real(precision), parameter :: pi = 4*atan(1.0_precision)
 complex(precision), parameter :: im = cmplx(0,1,precision)   ! Imaginary unit.
 
 end module Precision_Module
