@@ -48,9 +48,7 @@ subroutine InitSchottkyGroup(self, c_new, r_new, sigma_new)
         r(1:g) = r_new(1:g)
         sigma(1:g) = sigma_new(1:g)
     
-        if (.not. self%IsInsideModuliSpace()) then
-            error stop 'SchottkyGroup_Module/InitSchottkyGroup: outside of moduli space.'
-        end if
+        if (.not. self%IsInsideModuliSpace()) error stop 'InitSchottkyGroup: outside of moduli space.'
 
         c(-g:-1) = -c(g:1:-1)
         r(-g:-1) = r(g:1:-1)
