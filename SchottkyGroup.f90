@@ -68,8 +68,8 @@ function SchottkyGroupFromFile(pathToInputModuli) result(schottkyGroup)
 !       c_2  r_2
 !       ...
 !       c_g  r_g
+    character(*), intent(in) :: pathToInputModuli   ! String with full path to input file.
     class(SchottkyGroup_Type(:)), allocatable :: schottkyGroup
-    character(*) :: pathToInputModuli
     integer :: j, g, inputModuli_File
     real(precision), allocatable :: c(:), r(:) 
     integer, allocatable :: sigma(:)
