@@ -32,7 +32,7 @@ contains
     procedure :: Init => InitSchottkyGroup   ! Set new moduli and initialize all fields of type.
     procedure :: IsInsideModuliSpace         ! Is moduli+shift inside moduli space?
     procedure :: S_real, S_complex           ! Overloading for real/complex inputs.
-    generic   :: S => S_real, S_complex      ! Generators $S_j$, $1<=j<=g$, and their inverses. 
+    generic   :: S => S_real, S_complex      ! Generators $S_j$, 1<=j<=g, and their inverses. 
 end type SchottkyGroup_Type
 
 contains
