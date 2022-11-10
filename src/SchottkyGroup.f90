@@ -58,7 +58,7 @@ subroutine InitSchottkyGroup(self, c_new, r_new, sigma_new)
 end subroutine InitSchottkyGroup
 
 
-function SchottkyGroupFromFile(pathToInputModuli) result(schottkyGroup)
+function SchottkyGroupFromFile(pathToFile) result(schottkyGroup)
 ! Read Schottky moduli from file and return fully initialized Schottky group object.
 ! Input file must contain g+1 lines and be organized by the following template:
 !       g
@@ -66,13 +66,13 @@ function SchottkyGroupFromFile(pathToInputModuli) result(schottkyGroup)
 !       c_2  r_2
 !       ...
 !       c_g  r_g
-    character(*), intent(in) :: pathToInputModuli   ! String with full path to input file.
+    character(*), intent(in) :: pathToFile   ! String with full path to  input file.
     class(SchottkyGroup_Type(:)), allocatable :: schottkyGroup
     integer :: j, g, inputModuli_File
     real(precision), allocatable :: c(:), r(:) 
     integer, allocatable :: sigma(:)
 
-    open(file = pathToInputModuli, newunit = inputModuli_File, action = 'read')
+    open(file = pathToFile, newunit = inputModuli_File, action = 'read')
     read(inputModuli_file, *) g
     allocate(SchottkyGroup_Type(g) :: schottkyGroup)
     allocate(c(g), r(g), sigma(g))
