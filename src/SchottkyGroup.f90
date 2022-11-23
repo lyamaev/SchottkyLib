@@ -10,81 +10,30 @@ module SchottkyGroup_Module
 !    Hyperbolic transformations $S_1,\dots,S_g$ freely generate Schottky group $\mathfrak{S}$. 
 !
 ! Theorem: Orbit manifold of the Schottky group $\mathfrak{S}$ is a real hyperelliptic curve of 
-!    genus $g$ with $k$ real and $k$ coreal ovals and all such curves can be obtained in this way.      
+!          genus $g$ with $k$ real and $k$ coreal ovals and all such curves can be obtained in this way.      
 ! 
 ! Let $S_{-j} := S_j^{-1}$, $C_{-j} := -C_j$, $c_{-j} := -c_j$, $r_{-j} = r_j$, $\sigma_{-j} = \sigma_j$ for 1<=j<=g.
 
 use Precision_Module, only: precision
 implicit none
 private 
-public SchottkyGroup_Type, SchottkyGroupFromFile
 
-
-type SchottkyGroup_Type(g)                
-    integer, len :: g                        ! Genus of curve associated with Schottky group.
-    real(precision) :: c(-g:g), r(-g:g)      ! Schottky moduli. c(-l) = -c(l), r(-l) = r(l), 1<=l<=g.
-    integer :: sigma(-g:g)                   ! sigma(l) = sigma(-l) := $\pm1$, $l \in \Sigma^\pm$. 
-    real(precision) :: rr(-g:g)              ! rr(l) = rr(-l) := $\sigma_l r_l^2$, 1<=l<=g.
+type, public :: SchottkyGroup_Type                
+    integer :: g                                 ! Genus of curve associated with Schottky group.
+    real(precision), allocatable :: c(:), r(:)   ! (-g:g)  Schottky moduli. c(-j) = -c(j), r(-j) = r(j), 1<=j<=g.
+    integer, allocatable :: sigma(:)             ! (-g:g)  sigma(j) = sigma(-j) := $\pm1$, $j \in \Sigma^\pm$. 
+    real(precision), allocatable :: rr(:)        ! (-g:g)  rr(j) = rr(-j) := $\sigma_j r_j^2$, 1<=j<=g.
 contains 
-    procedure :: Init => InitSchottkyGroup   ! Set new moduli and initialize all fields of type.
-    procedure :: IsInsideModuliSpace         ! Is moduli+shift inside moduli space?
-    procedure :: S_Real, S_Complex           ! Overloading for real/complex inputs.
-    generic   :: S => S_Real, S_Complex      ! Generators $S_j$, 1<=j<=g, and their inverses. 
+    procedure :: S_Real, S_Complex           
+    generic   :: S => S_Real, S_Complex          ! Generators and their inverses overloaded for real/complex inputs.
+    procedure :: IsInsideModuliSpace             ! Is moduli+shift inside moduli space?
 end type SchottkyGroup_Type
 
 contains
 
-
-subroutine InitSchottkyGroup(self, c_new, r_new, sigma_new)   
-! Set new moduli and initialize all fields of Schottky group type.
-    class(SchottkyGroup_Type(*)), intent(inout) :: self
-    real(precision), intent(in) :: c_new(self%g), r_new(self%g)
-    integer, intent(in) :: sigma_new(self%g)
-    associate(g => self%g, c => self%c, r => self%r, sigma => self%sigma, rr => self%rr)
-        c(1:g) = c_new(1:g)
-        r(1:g) = r_new(1:g)
-        sigma(1:g) = sigma_new(1:g)
-    
-        if (.not. self%IsInsideModuliSpace()) error stop 'InitSchottkyGroup: outside of moduli space.'
-
-        c(-g:-1) = -c(g:1:-1)
-        r(-g:-1) = r(g:1:-1)
-        sigma(-g:-1) = sigma(g:1:-1)
-        rr(-g:g) = sigma(-g:g) * r(-g:g)**2
-    end associate
-end subroutine InitSchottkyGroup
-
-
-function SchottkyGroupFromFile(pathToFile) result(schottkyGroup)
-! Read Schottky moduli from file and return fully initialized Schottky group object.
-! Input file must contain g+1 lines and be organized by the following template:
-!       g
-!       c_1  r_1
-!       c_2  r_2
-!       ...
-!       c_g  r_g
-    character(*), intent(in) :: pathToFile   ! String with full path to  input file.
-    class(SchottkyGroup_Type(:)), allocatable :: schottkyGroup
-    integer :: j, g, inputModuli_File
-    real(precision), allocatable :: c(:), r(:) 
-    integer, allocatable :: sigma(:)
-
-    open(file = pathToFile, newunit = inputModuli_File, action = 'read')
-    read(inputModuli_file, *) g
-    allocate(SchottkyGroup_Type(g) :: schottkyGroup)
-    allocate(c(g), r(g), sigma(g))
-    do j = 1, g
-        read(inputModuli_file, *) c(j), r(j), sigma(j)
-    end do
-    call schottkyGroup%Init(c, r, sigma)
-    close(inputModuli_File)
-end function SchottkyGroupFromFile
-
-
 real(precision) elemental function S_Real(self, j, u)
-! Generators of Schottky group and their inverses: 
-! S(j,u) := $S_j(u)$, S(-j,u) := $S_j^{-1}(u)$ for 1<=l<=g.
-    class(SchottkyGroup_Type(*)), intent(in) :: self
+! Generators of Schottky group and their inverses: S(j,u) := $S_j(u)$, S(-j,u) := $S_j^{-1}(u)$, 1<=j<=g.
+    class(SchottkyGroup_Type), intent(in) :: self
     real(precision), intent(in) :: u
     integer, intent(in) :: j
     S_Real = self%c(j) - self%rr(j)/(u + self%c(j))     
@@ -92,9 +41,8 @@ end function S_Real
 
 
 complex(precision) elemental function S_Complex(self, j, u)
-! Generators of Schottky group and their inverses: 
-! S(j,u) := $S_j(u)$, S(-j,u) := $S_j^{-1}(u)$ for 1<=l<=g.
-    class(SchottkyGroup_Type(*)), intent(in) :: self
+! Generators of Schottky group and their inverses: S(j,u) := $S_j(u)$, S(-j,u) := $S_j^{-1}(u)$, 1<=j<=g.
+    class(SchottkyGroup_Type), intent(in) :: self
     complex(precision), intent(in) :: u
     integer, intent(in) :: j
     S_Complex = self%c(j) - self%rr(j)/(u + self%c(j))      
@@ -104,7 +52,7 @@ end function S_Complex
 logical pure function IsInsideModuliSpace(self, shift)  
 ! Check if shifted moduli define a point inside moduli space. Shift is optional, zero by default.
 ! Shift formula: c(1:g) --> c(1:g) + shift(1:g), r(1:g) --> r(1:g) + shift(g+1:2*g). 
-    class(SchottkyGroup_Type(*)), intent(in) :: self
+    class(SchottkyGroup_Type), intent(in) :: self
     real(precision), optional, intent(in) :: shift(2*self%g)
     real(precision) :: curr, rightPrev, c_new(self%g), r_new(self%g)
     integer :: j
@@ -134,6 +82,5 @@ logical pure function IsInsideModuliSpace(self, shift)
         IsInsideModuliSpace = .true.   ! Here if all tests passed.
     end associate
 end function IsInsideModuliSpace
-
 
 end module SchottkyGroup_Module
