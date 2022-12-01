@@ -40,119 +40,119 @@ function ChildrenOrder(a, eps) result(children)
         if (any(sigma(1:g) == -1)) then
             rightPrev = 0
             do j = 1,g
-				if (sigma(j) == -1) then
-					leftmostRight(j) = a%S(j,-rightPrev)  ! Leftmost position of $p^+_j$.
-					rightPrev = leftmostRight(j)
-				else 
-					rightPrev = p(+1,j)
-				end if
-			end do
-			do j = g,1,-1
-				if (sigma(j) == -1) then
-					if (j == g) then 
-						p(+1,j) = leftmostRight(g) + 1
-					else
-						p(+1,j) = (leftmostRight(j) + p(-1,j+1))/2
-					end if
-					p(-1,j) = a%S(j, -p(+1,j))
-				end if
-			end do
+                if (sigma(j) == -1) then
+                    leftmostRight(j) = a%S(j,-rightPrev)  ! Leftmost position of $p^+_j$.
+                    rightPrev = leftmostRight(j)
+                else 
+                    rightPrev = p(+1,j)
+                end if
+            end do
+            do j = g,1,-1
+                if (sigma(j) == -1) then
+                    if (j == g) then 
+                        p(+1,j) = leftmostRight(g) + 1
+                    else
+                        p(+1,j) = (leftmostRight(j) + p(-1,j+1))/2
+                    end if
+                    p(-1,j) = a%S(j, -p(+1,j))
+                end if
+            end do
         end if
         p(+1,-g:-1) = -p(-1,g:1:-1);  p(-1,-g:-1) = -p(+1,g:1:-1)
 
         ! Compute L(j,t) and lambda(t) := sum(L(:,t)). Schmies' estimate is only applicable, if max(lambda(:))<1.
         forall(j = -g:g, t = -g:g, j /= t .and. j /= 0 .and. t /= 0) 
-			L(j,t) = (r(j) / (p(sign(1,j-t),t) - c(j)))**2
-		end forall
-		forall(j = -g:g) 
-			L(j,j) = 0;  L(j,0) = 0;  L(0,j) = 0
-		end forall
-		forall(t = 1:g) lambda(t) = sum(L(-g:g,t))
-		lambdaMax = maxval(lambda(1:g))
+            L(j,t) = (r(j) / (p(sign(1,j-t),t) - c(j)))**2
+        end forall
+        forall(j = -g:g) 
+            L(j,j) = 0;  L(j,0) = 0;  L(0,j) = 0
+        end forall
+        forall(t = 1:g) lambda(t) = sum(L(-g:g,t))
+        lambdaMax = maxval(lambda(1:g))
 
-		if (lambdaMax < 1) then
-			K(1:g) = lambda(1:g)/(1-lambdaMax)   ! Schimes' estimate.
-			K(-g:-1) = K(g:1:-1)   
-		else
-			! $\gamma_k$ is an upper estimate of $\sum_{l: SS_l>S_l}\diam(SS_l\cF)/diam(S\cF)$, where 
-			! $k$ is an index of the rightmost letter of $S\ne\id$, $\cF$ -- fundamental domain.
-			forall(j = 2:g-1) gamma(j) = ((p(-1,j+1) - p(-1,j)) / (p(-1,j+1) - p(+1,j))) / &
-						              	 ((p(+1,j-1) - p(-1,j)) / (p(+1,j-1) - p(+1,j)))	
-			gamma(1) = ((p(-1,2) - p(-1,1)) / (p(-1,2) - p(+1,1))) / &
-					   ((p(+1,-1) - p(-1,1)) / (p(+1,-1) - p(+1,1)))	
-			gamma(g) = ((p(-1,-g) - p(-1,g)) / (p(-1,-g) - p(+1,g))) / &
-					   ((p(+1,g-1) - p(-1,g)) / (p(+1,g-1) - p(+1,g)))	
+        if (lambdaMax < 1) then
+            K(1:g) = lambda(1:g)/(1-lambdaMax)   ! Schimes' estimate.
+            K(-g:-1) = K(g:1:-1)   
+        else
+            ! $\gamma_k$ is an upper estimate of $\sum_{l: SS_l>S_l}\diam(SS_l\cF)/diam(S\cF)$, where 
+            ! $k$ is an index of the rightmost letter of $S\ne\id$, $\cF$ -- fundamental domain.
+            forall(j = 2:g-1) gamma(j) = ((p(-1,j+1) - p(-1,j)) / (p(-1,j+1) - p(+1,j))) / &
+                                         ((p(+1,j-1) - p(-1,j)) / (p(+1,j-1) - p(+1,j)))
+            gamma(1) = ((p(-1,2) - p(-1,1)) / (p(-1,2) - p(+1,1))) / &
+                       ((p(+1,-1) - p(-1,1)) / (p(+1,-1) - p(+1,1)))    
+            gamma(g) = ((p(-1,-g) - p(-1,g)) / (p(-1,-g) - p(+1,g))) / &
+                       ((p(+1,g-1) - p(-1,g)) / (p(+1,g-1) - p(+1,g)))	
 
-			! Upper estimate of $\sum_{S\ne\id} diam(S\cF)$.
-			sumOfDiamsEstimate = (sqrt(maxval(gamma)) + 1) * sum(p(+1,1:g) - p(-1,1:g))
+            ! Upper estimate of $\sum_{S\ne\id} diam(S\cF)$.
+            sumOfDiamsEstimate = (sqrt(maxval(gamma)) + 1) * sum(p(+1,1:g) - p(-1,1:g))
 
-			forall(j = -g:g, t = 1:g, j /= t .and. j /= 0) 
-				h(j,t) = (p(+1,j) - p(-1,j)) / (4*(p(sign(1,j-t),t) - p(-1,j))*(p(sign(1,j-t),t) - p(+1,j)))
-			end forall
-			forall(t = -g:g) h(t,t) = 0
-			h(0,1:g) = 0
-		
-			forall(t = 1:g)	K(t) = sumOfDiamsEstimate * maxval(h(-g:g,t))   ! New estimate (Schmies' isn't applicable).
-			K(-g:-1) = K(g:1:-1)
-		end if
+            forall(j = -g:g, t = 1:g, j /= t .and. j /= 0) 
+                h(j,t) = (p(+1,j) - p(-1,j)) / (4*(p(sign(1,j-t),t) - p(-1,j))*(p(sign(1,j-t),t) - p(+1,j)))
+            end forall
+            forall(t = -g:g) h(t,t) = 0
+            h(0,1:g) = 0
+        
+            forall(t = 1:g) K(t) = sumOfDiamsEstimate * maxval(h(-g:g,t))   ! New estimate (Schmies' isn't applicable).
+            K(-g:-1) = K(g:1:-1)
+        end if
 
-		M = 0
-		forall(t = -g:g, t /= 0) M(-g:g,t) = (1 + K(-g:g)) * L(g:-g:-1,t)
-		M = M/maxval(M)   ! Normalize.
+        M = 0
+        forall(t = -g:g, t /= 0) M(-g:g,t) = (1 + K(-g:g)) * L(g:-g:-1,t)
+        M = M/maxval(M)   ! Normalize.
 
-		do t = 1,g 
-			cnt = 1
-			do j = -g,g 
-				if (j /= 0 .and. j /= -t) then 
-					children(t,cnt)%childIndex = j
-					children(t,cnt)%childEps = eps/M(j,t)
-					cnt = cnt + 1
-				end if
-			end do
-			call QSort(children(t,1:2*g-1))
-			children(-t,1:2*g-1)%childIndex = -children(t,1:2*g-1)%childIndex
-			children(-t,1:2*g-1)%childEps = children(t,1:2*g-1)%childEps
-		end do
-	end associate
+        do t = 1,g 
+            cnt = 1
+            do j = -g,g 
+                if (j /= 0 .and. j /= -t) then 
+                    children(t,cnt)%childIndex = j
+                    children(t,cnt)%childEps = eps/M(j,t)
+                    cnt = cnt + 1
+                end if
+            end do
+            call QSort(children(t,1:2*g-1))
+            children(-t,1:2*g-1)%childIndex = -children(t,1:2*g-1)%childIndex
+            children(-t,1:2*g-1)%childEps = children(t,1:2*g-1)%childEps
+        end do
+    end associate
 end function ChildrenOrder
 
 
 recursive subroutine QSort(array)   ! Quick sort by ascending of array(:)%childEps.
-	type(Child_Type), intent(inout) :: array(:)
+    type(Child_Type), intent(inout) :: array(:)
     type(Child_Type) :: temp
-	integer :: n, left, right, marker
+    integer :: n, left, right, marker
     real(precision) :: random, pivot
 
     n = size(array)
     if (n > 1) then
-    	call random_seed()
-    	call random_number(random)
-    	pivot = array(int(random*(n-1))+1)%childEps
-    	left = 1;  right = n
+        call random_seed()
+        call random_number(random)
+        pivot = array(int(random*(n-1))+1)%childEps
+        left = 1;  right = n
 
-      	Main_Loop: do
-        	if (left >= right) exit
-          	FindRight_Loop: do
-            	if (array(right)%childEps <= pivot) exit
-             	right = right - 1
-          	end do FindRight_Loop
-        	FindLeft_Loop: do
-        		if (array(left)%childEps >= pivot) exit
-            	left = left + 1
-        	end do FindLeft_Loop
-        	if (left < right) then
-        		temp = array(left);  array(left) = array(right);  array(right) = temp
-        	end if
-       	end do Main_Loop
+        Main_Loop: do
+            if (left >= right) exit
+            FindRight_Loop: do
+                if (array(right)%childEps <= pivot) exit
+                right = right - 1
+            end do FindRight_Loop
+            FindLeft_Loop: do
+                if (array(left)%childEps >= pivot) exit
+                left = left + 1
+            end do FindLeft_Loop
+            if (left < right) then
+                temp = array(left);  array(left) = array(right);  array(right) = temp
+            end if
+        end do Main_Loop
 
-    	if (left == right) then
-       		marker = left + 1
+        if (left == right) then
+            marker = left + 1
        	else
-        	marker = left
-       	end if
+            marker = left
+        end if
 
-    	call QSort(array(:marker-1))
-    	call QSort(array(marker:))
+        call QSort(array(:marker-1))
+        call QSort(array(marker:))
     end if
 end subroutine QSort
 
