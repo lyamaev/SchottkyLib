@@ -17,8 +17,9 @@ module SchottkyGroup_Module
 use Precision_Module, only: precision
 implicit none
 private 
+public SchottkyGroup_Type
 
-type, public :: SchottkyGroup_Type                
+type :: SchottkyGroup_Type                
     integer :: g                                 ! Genus of curve associated with Schottky group.
     real(precision), allocatable :: c(:), r(:)   ! (-g:g)  Schottky moduli. c(-j) = -c(j), r(-j) = r(j), 1<=j<=g.
     integer, allocatable :: sigma(:)             ! (-g:g)  sigma(j) = sigma(-j) := $\pm1$, $j \in \Sigma^\pm$. 
@@ -27,9 +28,33 @@ contains
     procedure :: S_Real, S_Complex           
     generic   :: S => S_Real, S_Complex          ! Generators and their inverses overloaded for real/complex inputs.
     procedure :: IsInsideModuliSpace             ! Is moduli+shift inside moduli space?
+    procedure :: SetNewModuli                    ! Set new moduli c, r, sigma and initialize all fields of type. 
 end type SchottkyGroup_Type
 
 contains
+
+subroutine SetNewModuli(self, c_new, r_new, sigma_new)
+    class(SchottkyGroup_Type), intent(inout) :: self
+    real(precision), intent(in) :: c_new(self%g), r_new(self%g)
+    integer, intent(in), optional :: sigma_new(self%g)
+    associate(g => self%g, c => self%c, r => self%r, sigma => self%sigma, rr => self%rr)
+        c(1:g) = c_new(1:g)
+        r(1:g) = r_new(1:g)
+        if (present(sigma_new)) then
+            sigma(1:g) = sigma_new(1:g)
+        else
+            sigma(1:g) = 1   ! M-curve by default.
+        end if
+
+        if (.not. self%IsInsideModuliSpace()) error stop 'SetNewModuli: outside of moduli space.'
+        
+        c(-g:-1) = -c(g:1:-1)
+        r(-g:-1) = r(g:1:-1)
+        sigma(-g:-1) = sigma(g:1:-1)
+        rr(-g:g) = sigma(-g:g) * r(-g:g)**2        
+    end associate
+end subroutine SetNewModuli
+
 
 real(precision) elemental function S_Real(self, j, u)
 ! Generators of Schottky group and their inverses: S(j,u) := $S_j(u)$, S(-j,u) := $S_j^{-1}(u)$, 1<=j<=g.
