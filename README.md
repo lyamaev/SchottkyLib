@@ -17,8 +17,8 @@ Modules of SchottkyLib:
 
 Folder `./examples` contains two short examples to try the library out:
 
-- `Example1` — Check numerically that reciprocity law for Abelian differentials holds: $\int_{b_j}\eta_{zw}=\int_w^z\zeta_j$, where $\zeta_j$ and $\eta_{zw}$ are the normalized Abelian differentials of the 1st and the 3rd kinds, respectively.
-- `Example2` — Construct Schottky group associated with an M-curve given in algebraic model and check that projections of ramification points in Schottky model coincide with ramification points in algebraic model.
+- `ReciprocityLaw` — Check numerically that reciprocity law for Abelian differentials holds: $\int_{b_j}\eta_{zw}=\int_w^z\zeta_j$, where $\zeta_j$ and $\eta_{zw}$ are the normalized Abelian differentials of the 1st and the 3rd kinds, respectively.
+- `RamificationPts` — Construct Schottky group associated with M-curve given in algebraic model and check that projections of ramification points in Schottky model coincide with ramification points in algebraic model.
 
 SchottkyLib is a core part of a bigger package developed by the author during his PhD research. The bigger library is an implementation of Chebyshev ansatz[^4][^5] for practical synthesis of quasi-optimal multiband filters (of different types: digital, analog and microwave) and also contains evaluation of gradients of Abelian integrals and their periods by Schottky moduli using Hejhal’s approach. 
 
