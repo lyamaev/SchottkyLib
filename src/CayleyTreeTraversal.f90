@@ -81,7 +81,7 @@ function Traversal_BogatyrevAlg(schottkyGroup, params) result(res)
     type(TraversalParameters_Type), intent(in) :: params
     complex(precision) :: res(size(params%idTransformTerm))
     integer :: len                                    ! Length of current branch: len := $|T|$.
-    integer :: letter(0:maxLen)                        ! Word representation of current node T.
+    integer :: letter(0:maxLen)                       ! Word representation of current node T.
     real(precision) :: Sz(size(params%z), 0:maxLen)   ! Sz for all nodes S in current branch.
     logical :: isNotFound, shouldContribute 
 
@@ -94,7 +94,7 @@ function Traversal_BogatyrevAlg(schottkyGroup, params) result(res)
         Traversal_Loop: do 
             ! Find next node.
             if (abs(Sz(1,len)-Sz(2,len)) >= params%eps .and. len < maxLen) then
-                len = len + 1         ! Grow current branch. 
+                len = len + 1          ! Grow current branch. 
                 letter(len) = -g - 1   ! We will add +1 in FindNextNode_Loop.
             end if
             isNotFound = .true.       ! Next node is not found yet.
