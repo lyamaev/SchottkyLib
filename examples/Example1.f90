@@ -1,7 +1,6 @@
 program Example1   
-! Check numerically that reciprocity law for Abelian differentials of the 1st and the 3rd kinds holds, 
-! i.e. that $\int_{b_j}\eta_{zw}=\int_w^z\zeta_j$, where where $\zeta_j$ and $\eta_{zw}$ are the 
-! normalized Abelian differentials of the 1st and the 3rd kinds, respectively.
+! Check numerically that reciprocity law for Abelian differentials holds: $\int_{b_j}\eta_{zw}=\int_w^z\zeta_j$, 
+! where $\zeta_j$ and $\eta_{zw}$ are the normalized Abelian differentials of the 1st and the 3rd kinds, respectively.
 
 use Precision_Module, only: p => precision
 use DiffsAndFuncsOnCurve_Module, only: SchottkyNumerics_Type
@@ -12,7 +11,7 @@ integer :: j
 real(p) :: z, w
 
 ! Construct Schottky group of genus 3 from the given Schottky moduli using class constructor.
-schottkyGroup = SchottkyNumerics_Type(c=[0.1_p, 0.55_p, 1.0_p], r=[0.01_p, 0.1_p, 0.05_p], sigma=[1, -1, 1])
+schottkyGroup = SchottkyNumerics_Type(c = [0.1_p, 0.55_p, 1.0_p], r = [0.01_p, 0.1_p, 0.05_p], sigma = [1, -1, 1])
 
 j = 2
 z = -2.1_p
