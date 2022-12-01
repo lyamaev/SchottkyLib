@@ -12,41 +12,36 @@ implicit none
 private 
 public ChildrenOrder, Child_Type
 
-
-type Child_Type   
-	integer :: childIndex             ! Equals j for child $S_jT$, $j\ne -t$.
-	real(precision) :: childEps       ! eps/M(j,t).
+type :: Child_Type   
+    integer :: childIndex         ! Equals j for child $S_jT$, $j\ne -t$.
+    real(precision) :: childEps   ! eps/M(j,t).
 end type Child_Type
-
 
 contains
 
+function ChildrenOrder(a, eps) result(children)
+    class(SchottkyGroup_Type), intent(in) :: a   ! Schottky group.
+    type(Child_Type) :: children(-a%g:a%g,1:2*a%g-1)   
+    real(precision), intent(in) :: eps
+    integer :: j, t, cnt
+    real(precision) :: L(-a%g:a%g,-a%g:a%g)   ! L(j,t) -- estimate of $f(S_{-j}T)/f(T)$.
+    real(precision) :: K(-a%g:a%g)            ! K(t) -- estimate of $\sum_{S: S>T} f(S)/f(T)$.
+    real(precision) :: M(-a%g:a%g,-a%g:a%g)   ! M(j,t) := L(-j,t)(K(t)+1).
+    real(precision) :: p(-1:1,-a%g:a%g)       ! p(\pm1,j) -- intersection points $C_j\cap\R$.
+    real(precision) :: sumOfDiamsEstimate     ! Estimate of $\sum_{S\ne\id} diam(S\cF)$.
+    real(precision) :: leftmostRight(a%g), rightPrev, lambda(a%g), lambdaMax, gamma(a%g), h(-a%g:a%g,1:a%g)
 
-function ChildrenOrder(sch, eps) result(children)
-	class(SchottkyGroup_Type(*)), intent(in) :: sch
-	type(Child_Type) :: children(-sch%g:sch%g,1:2*sch%g-1)
-	real(precision), intent(in) :: eps
-	integer :: j, t, cnt
-	real(precision) :: L(-sch%g:sch%g,-sch%g:sch%g)            ! L(j,t) -- estimate of $f(S_{-j}T)/f(T)$.
-	real(precision) :: K(-sch%g:sch%g)		                   ! K(t) -- estimate of $\sum_{S: S>T} f(S)/f(T)$.
-	real(precision) :: M(-sch%g:sch%g,-sch%g:sch%g)            ! M(j,t) := L(-j,t)(K(t)+1).
-	real(precision) :: p(-1:1,-sch%g:sch%g)                    ! p(\pm1,j) -- intersection points $C_j\cap\R$.
-	real(precision) :: sumOfDiamsEstimate                      ! Estimate of $\sum_{S\ne\id} diam(S\cF)$.
-	real(precision) :: leftmostRight(sch%g), rightPrev, &      ! Auxiliary.
-					   lambda(sch%g), lambdaMax, &   
-	                   gamma(sch%g), h(-sch%g:sch%g,1:sch%g)
-
-	associate(g => sch%g, c => sch%c, r => sch%r, sigma => sch%sigma)	
-		! Generate p(\pm1,j) := $p^\pm_j$ -- intersection points of $C_j$ with real line. If $\sigma_j = -1$ then 
-		! circle $C_j$ is not uniqly determined by moduli, and so intersection points $p^\pm_j$.
-		forall(j = 1:g, sigma(j) == 1) 
-			p(-1,j) = c(j) - r(j);  p(+1,j) = c(j) + r(j)
-		end forall
-		if (any(sigma(1:g) == -1)) then
-			rightPrev = 0
-			do j = 1,g
+    associate(g => a%g, c => a%c, r => a%r, sigma => a%sigma)	
+        ! Generate p(\pm1,j) := $p^\pm_j$ -- intersection points of $C_j$ with real line. If $\sigma_j = -1$ then 
+        ! circle $C_j$ is not uniqly determined by moduli, and so intersection points $p^\pm_j$.
+        forall(j = 1:g, sigma(j) == 1) 
+            p(-1,j) = c(j) - r(j);  p(+1,j) = c(j) + r(j)
+        end forall
+        if (any(sigma(1:g) == -1)) then
+            rightPrev = 0
+            do j = 1,g
 				if (sigma(j) == -1) then
-					leftmostRight(j) = sch%S(j,-rightPrev)  ! Leftmost position of $p^+_j$.
+					leftmostRight(j) = a%S(j,-rightPrev)  ! Leftmost position of $p^+_j$.
 					rightPrev = leftmostRight(j)
 				else 
 					rightPrev = p(+1,j)
@@ -59,14 +54,14 @@ function ChildrenOrder(sch, eps) result(children)
 					else
 						p(+1,j) = (leftmostRight(j) + p(-1,j+1))/2
 					end if
-					p(-1,j) = sch%S(j, -p(+1,j))
+					p(-1,j) = a%S(j, -p(+1,j))
 				end if
 			end do
-		end if
-		p(+1,-g:-1) = -p(-1,g:1:-1);  p(-1,-g:-1) = -p(+1,g:1:-1)
+        end if
+        p(+1,-g:-1) = -p(-1,g:1:-1);  p(-1,-g:-1) = -p(+1,g:1:-1)
 
-		! Compute L(j,t) and lambda(t) := sum(L(:,t)). Schmies' estimate is only applicable, if max(lambda(:))<1.
-		forall(j = -g:g, t = -g:g, j /= t .and. j /= 0 .and. t /= 0) 
+        ! Compute L(j,t) and lambda(t) := sum(L(:,t)). Schmies' estimate is only applicable, if max(lambda(:))<1.
+        forall(j = -g:g, t = -g:g, j /= t .and. j /= 0 .and. t /= 0) 
 			L(j,t) = (r(j) / (p(sign(1,j-t),t) - c(j)))**2
 		end forall
 		forall(j = -g:g) 
@@ -101,7 +96,9 @@ function ChildrenOrder(sch, eps) result(children)
 			K(-g:-1) = K(g:1:-1)
 		end if
 
+		M = 0
 		forall(t = -g:g, t /= 0) M(-g:g,t) = (1 + K(-g:g)) * L(g:-g:-1,t)
+		M = M/maxval(M)   ! Normalize.
 
 		do t = 1,g 
 			cnt = 1
@@ -113,37 +110,38 @@ function ChildrenOrder(sch, eps) result(children)
 				end if
 			end do
 			call QSort(children(t,1:2*g-1))
-			children(-t,1:2*g-1) = children(t,2*g-1:1:-1)
+			children(-t,1:2*g-1)%childIndex = -children(t,1:2*g-1)%childIndex
+			children(-t,1:2*g-1)%childEps = children(t,1:2*g-1)%childEps
 		end do
 	end associate
 end function ChildrenOrder
 
 
-recursive subroutine QSort(a)   ! Quick sort by ascending of a(:)%childEps.
-	type(Child_Type), intent(inout) :: a(:)
+recursive subroutine QSort(array)   ! Quick sort by ascending of array(:)%childEps.
+	type(Child_Type), intent(inout) :: array(:)
     type(Child_Type) :: temp
 	integer :: n, left, right, marker
     real(precision) :: random, pivot
 
-    n = size(a)
+    n = size(array)
     if (n > 1) then
     	call random_seed()
     	call random_number(random)
-    	pivot = a(int(random*(n-1))+1)%childEps
+    	pivot = array(int(random*(n-1))+1)%childEps
     	left = 1;  right = n
 
       	Main_Loop: do
         	if (left >= right) exit
           	FindRight_Loop: do
-            	if (a(right)%childEps <= pivot) exit
+            	if (array(right)%childEps <= pivot) exit
              	right = right - 1
           	end do FindRight_Loop
         	FindLeft_Loop: do
-        		if (a(left)%childEps >= pivot) exit
+        		if (array(left)%childEps >= pivot) exit
             	left = left + 1
         	end do FindLeft_Loop
         	if (left < right) then
-        		temp = a(left);  a(left) = a(right);  a(right) = temp
+        		temp = array(left);  array(left) = array(right);  array(right) = temp
         	end if
        	end do Main_Loop
 
@@ -153,10 +151,9 @@ recursive subroutine QSort(a)   ! Quick sort by ascending of a(:)%childEps.
         	marker = left
        	end if
 
-    	call QSort(a(:marker-1))
-    	call QSort(a(marker:))
+    	call QSort(array(:marker-1))
+    	call QSort(array(marker:))
     end if
 end subroutine QSort
-
 
 end module ChildrenOrder_Module
