@@ -33,10 +33,7 @@ implicit none
 private
 public Traversal_Interface, TraversalParameters_Type, Traversal_BogatyrevAlg, Traversal_NewAlg
 
-
-! Max length of branch. All nodes with greater norm will be excluded from traversal.
-integer, parameter :: maxLen = 10000     
-
+integer, parameter :: maxLen = 10000   ! Max length of branch. All nodes S: |S|>maxLen are excluded from traversal.
 
 interface 
     function Term_Interface(u, z)
@@ -47,7 +44,6 @@ interface
     end function Term_Interface
 end interface
 
-
 interface 
     function Operation_Interface(arg1, arg2)
         import :: precision
@@ -56,8 +52,7 @@ interface
     end function Operation_Interface
 end interface
 
-
-type TraversalParameters_Type
+type :: TraversalParameters_Type
     procedure(Operation_Interface), pointer, nopass :: Operation   ! Sum or Product.
     real(precision), allocatable :: z(:)                    ! $Sz$ is computed for each visited node $S$.
     complex(precision), allocatable :: u(:)                 ! $Su$ is not computed.
@@ -69,33 +64,30 @@ type TraversalParameters_Type
     type(Child_Type), allocatable :: children(:,:)          ! (-g:g,1:2*g+1)  Children order and childEps (for NewAlg).
 end type TraversalParameters_Type
 
-
 interface 
     function Traversal_Interface(schottkyGroup, params)
         import :: precision, SchottkyGroup_Type, TraversalParameters_Type
-        class(SchottkyGroup_Type(*)), intent(in) :: schottkyGroup
+        class(SchottkyGroup_Type), intent(in) :: schottkyGroup
         type(TraversalParameters_Type), intent(in) :: params
         complex(precision) :: Traversal_Interface(size(params%u))
     end function Traversal_Interface
 end interface
 
-
 contains
-
 
 function Traversal_BogatyrevAlg(schottkyGroup, params) result(res)
 ! Bogatyrev's algorithm. Implementation is based on depth-first search and lexicographical order.
-    class(SchottkyGroup_Type(*)), intent(in) :: schottkyGroup
+    class(SchottkyGroup_Type), intent(in) :: schottkyGroup
     type(TraversalParameters_Type), intent(in) :: params
     complex(precision) :: res(size(params%idTransformTerm))
     integer :: len                                    ! Length of current branch: len := $|T|$.
-    integer :: label(0:maxLen)                        ! Word representation of current node T.
+    integer :: letter(0:maxLen)                        ! Word representation of current node T.
     real(precision) :: Sz(size(params%z), 0:maxLen)   ! Sz for all nodes S in current branch.
     logical :: isNotFound, shouldContribute 
 
     associate(g => schottkyGroup%g, lc => params%leftCoset, rc => params%rightCoset)
         len = 0
-        label(0) = 0
+        letter(0) = 0
         Sz(:,0) = params%z 
         res = params%idTransformTerm
 
@@ -103,25 +95,25 @@ function Traversal_BogatyrevAlg(schottkyGroup, params) result(res)
             ! Find next node.
             if (abs(Sz(1,len)-Sz(2,len)) >= params%eps .and. len < maxLen) then
                 len = len + 1         ! Grow current branch. 
-                label(len) = -g - 1   ! We will add +1 in FindNextNode_Loop.
+                letter(len) = -g - 1   ! We will add +1 in FindNextNode_Loop.
             end if
             isNotFound = .true.       ! Next node is not found yet.
             FindNextNode_Loop: do while (isNotFound)
-                do while (label(len) == g)
+                do while (letter(len) == g)
                     len = len - 1          ! Layer is full: go one layer backward.
                     if (len == 0) RETURN   ! Finish traversal if we are at root again.
                 end do
-                label(len) = label(len) + 1
-                if (label(len) == 0) label(len) = 1   ! Jump over 0 (no such label).
-                isNotFound = (label(len) == -label(len-1)) .or.                        &  
-                             (len == 1 .and. params%isReduced .and. label(1) < 0) .or. &   
-                             (len == size(rc) .and. AreEqualOrInverse(label(1:len),rc))   
+                letter(len) = letter(len) + 1
+                if (letter(len) == 0) letter(len) = 1   ! Jump over 0 (no such letter).
+                isNotFound = (letter(len) == -letter(len-1)) .or.                        &  
+                             (len == 1 .and. params%isReduced .and. letter(1) < 0) .or. &   
+                             (len == size(rc) .and. AreEqualOrInverse(letter(1:len),rc))   
             end do FindNextNode_Loop
 
             ! Contribute node to sum/prod.  
-            Sz(:,len) = schottkyGroup%S(label(len), Sz(:,len-1))
+            Sz(:,len) = schottkyGroup%S(letter(len), Sz(:,len-1))
             shouldContribute = (size(lc) == 0) .or. (len < size(lc)) .or. &
-                               (.not. AreEqualOrInverse(label(len-size(lc)+1:len),lc))
+                               (.not. AreEqualOrInverse(letter(len-size(lc)+1:len),lc))
             if (shouldContribute) res = params%Operation(res, params%Term(params%u, Sz(:,len))) 
         end do Traversal_Loop
     end associate
@@ -129,7 +121,7 @@ end function Traversal_BogatyrevAlg
 
 
 function Traversal_NewAlg(schottkyGroup, params) result(res)   
-    class(SchottkyGroup_Type(*)), intent(in) :: schottkyGroup
+    class(SchottkyGroup_Type), intent(in) :: schottkyGroup
     type(TraversalParameters_Type), intent(in) :: params
     complex(precision) :: res(size(params%idTransformTerm))
     integer :: len                                    ! Length of current branch: len := $|T|$.
@@ -160,7 +152,7 @@ function Traversal_NewAlg(schottkyGroup, params) result(res)
 
                 if (len == 1) then
                     if (child_num(len) <= g) then  
-                        if (params%isReduced) CONTINUE
+                        if (params%isReduced) CYCLE FindNextNode_Loop
                         letter(len) = -child_num(len)
                     else
                         letter(len) = child_num(len) - g
@@ -168,14 +160,15 @@ function Traversal_NewAlg(schottkyGroup, params) result(res)
                 else 
                     if (dist(len-1) < params%children(letter(len-1),child_num(len))%childEps) then 
                         len = len - 1   ! Throw away current node together with all its younger brothers.
-                        CONTINUE
+                        CYCLE FindNextNode_Loop
                     end if
                     letter(len) = params%children(letter(len-1),child_num(len))%childIndex
                 end if
 
-                if (len == size(rc) .and. AreEqualOrInverse(letter(1:len),rc)) CONTINUE
+                if (len /= size(rc) .or. .not. AreEqualOrInverse(letter(1:len),rc)) EXIT FindNextNode_Loop
             end do FindNextNode_Loop
 
+            ! Contribute node to sum/prod.  
             Sz(:,len) = schottkyGroup%S(letter(len), Sz(:,len-1))
             dist(len) = abs(Sz(1,len) - Sz(2,len))
             shouldContribute = (size(lc) == 0) .or. (len < size(lc)) .or. &
@@ -191,6 +184,5 @@ logical pure function AreEqualOrInverse(word1, word2)
     integer, intent(in) :: word2(:), word1(size(word2))
     AreEqualOrInverse = all(word1 == word2) .or. all(word1 == -word2(size(word2):1:-1)) 
 end function AreEqualOrInverse
-
 
 end module CayleyTreeTraversal_Module
