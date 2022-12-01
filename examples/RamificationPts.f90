@@ -1,4 +1,4 @@
-program Example2
+program RamificationPts
 ! Construct Schottky group associated with M-curve given in algebraic model and check that projections
 ! of ramification points in Schottky model coincide with ramification points in algebraic model.
 
@@ -32,4 +32,4 @@ print *, 'Ramification points in algebraic model:', real(ramInAlgM, kind=4)
 
 ! Output:
 ! Ramification points in algebraic model:  0.1000000   0.2000000   1.000000   1.300000   1.500000   2.900000    
-end program Example2
+end program RamificationPts
