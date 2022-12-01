@@ -1,4 +1,4 @@
-program Example1   
+program ReciprocityLaw   
 ! Check numerically that reciprocity law for Abelian differentials holds: $\int_{b_j}\eta_{zw}=\int_w^z\zeta_j$, 
 ! where $\zeta_j$ and $\eta_{zw}$ are the normalized Abelian differentials of the 1st and the 3rd kinds, respectively.
 
@@ -31,4 +31,4 @@ print *, 'LHS and RHS of reciprocity law:', log(real([lhs(1)/lhs(2), rhs(1)/rhs(
 
 ! Output:
 ! LHS and RHS of reciprocity law:  0.8132047      0.8132047 
-end program Example1
+end program ReciprocityLaw
