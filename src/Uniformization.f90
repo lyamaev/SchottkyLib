@@ -23,8 +23,10 @@ real(precision), parameter :: inftyImage = -1.5_precision
 
 contains
 
-function PoincareUniformization(ramInAlgM, slG) result(schottkyGroup)   ! Opening process with 'slG' gens of slots.
-	real(precision), intent(in) :: ramInAlgM(:)   ! Flat array of ram pts in algebraic model: $x_j^\pm$, 1<=j<=g.
+function PoincareUniformization(ramInAlgM, slG) result(schottkyGroup)   ! Opening process with 'slG' gens of slots. 
+! ramInAlgM := [x_1^-, x_1^+, x_2^-, x_2^+, ..., x_g^-, x_g^+] -- flat array of ramification points in algebraic 
+! model sotred in ascending order.
+	real(precision), intent(in) :: ramInAlgM(:)
 	integer, intent(in) :: slG                    ! Number of slot generations we want to process.
 	real(precision) :: p(size(ramInAlgM)/2+1,2)   ! Current approximation of intersection points $c_j \pm r_j$.
 	real(precision) :: q(2)                       ! q := [c_0,r_0] in thesis notations.
@@ -38,9 +40,8 @@ function PoincareUniformization(ramInAlgM, slG) result(schottkyGroup)   ! Openin
 		p(j+1,1) = ramInAlgM(2*j-1) 
 		p(j+1,2) = ramInAlgM(2*j)
 	end forall
-	p = p / maxval(p)
-	p = inftyImage * p / (p + inftyImage - 1)   ! Normalize: 0->0, 1->1, $\infty$->$\inftyImage$.
-	p(1,1) = inftyImage
+	p = p / (2*p(g+1,2) - p)   ! Normalize: 0->0, $x_g^+$->1, $\infty$->-1.
+	p(1,1) = -1
 	p(1,2) = 0
 
 	n(1) = g+1
