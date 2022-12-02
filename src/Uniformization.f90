@@ -19,7 +19,6 @@ private
 
 integer, parameter :: slN = 100000   ! Maximum number of slots.
 real(precision), parameter :: uEps = Epsilon(1.0_precision)
-real(precision), parameter :: inftyImage = -1.5_precision
 
 contains
 
