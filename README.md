@@ -24,8 +24,8 @@ SchottkyLib is a core part of a bigger package developed by the author during hi
 
 SchottkyLib is written in Fortran 2018 and tested to compile successfully with gfortran 12.2.0 and ifort 2022.2.1. 
 
-[^2]: S.Yu. Lyamaev, [Summation of Poincaré theta-series in Schottky model](https://link.springer.com/article/10.1134/S0965542522070053), *Computational Mathematics and Mathematical Physics,* **62**:7 (2022), 1059–1073.
+[^2]: S.Yu. Lyamaev, [Summation of Poincaré theta-series in the Schottky model](https://link.springer.com/article/10.1134/S0965542522070053), *Computational Mathematics and Mathematical Physics,* **62**:7 (2022), 1059–1073.
 
-[^4]: A. B. Bogatyrev, [Chebyshev representation for rational functions](https://doi.org/10.1070/SM2010v201n11ABEH004123), *Sb. Math.*, **201**:11 (2010), 1579–1598.
+[^4]: A. B. Bogatyrev, [Chebyshev representation for rational functions](https://doi.org/10.1070/SM2010v201n11ABEH004123), *Sbornik: Mathematics*, **201**:11 (2010), 1579–1598.
 
-[^5]: A.B. Bogatyrev, S.A. Goreinov, S.Yu. Lyamaev, [Analytical approach to multiband filter synthesis and comparison to other approaches](https://link.springer.com/article/10.1134/S0032946017030073), *Problems Inform. Transmission*, **53**:3 (2017), 260–273.
+[^5]: A.B. Bogatyrev, S.A. Goreinov, S.Yu. Lyamaev, [Analytical approach to multiband filter synthesis and comparison to other approaches](https://link.springer.com/article/10.1134/S0032946017030073), *Problems of Information Transmission*, **53**:3 (2017), 260–273.
