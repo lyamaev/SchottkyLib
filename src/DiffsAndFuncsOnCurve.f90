@@ -34,7 +34,7 @@ procedure(Traversal_Interface), pointer :: Traversal   ! Module-scale traversal 
 
 type, extends(SchottkyGroup_Type) :: SchottkyNumerics_Type
     real(precision)  :: eps = 1000*Epsilon(1.0_precision)    ! Parameter to control accuracy of (a posteriori) algs.
-    logical :: useNewAlg = .false.                            ! Use NewAlg (or BogatyrevAlg)?
+    logical :: useNewAlg = .true.                            ! Use NewAlg (or BogatyrevAlg)?
     real(precision), allocatable :: alpha(:)                 ! (2*g-1)  AFP of $S_j$ and $S_jS_1^{-1}S_j$. 
     real(precision), allocatable :: lambda(:)                ! (g)  lambda(j) := $S_j'\alpha_j$ -- multiplier of $S_j$.
     type(Child_Type), allocatable :: children(:,:)           ! (-g:g,1:2*g-1)  childEps for linear differentials.
