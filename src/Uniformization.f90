@@ -29,7 +29,7 @@ function PoincareUniformization(ramInAlgM, slG) result(schottkyGroup)   ! Openin
     integer, intent(in) :: slG                    ! Number of slot generations we want to process.
     real(precision) :: p(size(ramInAlgM)/2+1,2)   ! Current approximation of intersection points $c_j \pm r_j$.
     real(precision) :: q(2)                       ! q := [c_0,r_0] in thesis notations.
-    real(precision) :: slot(slG,slN,2)   ! Array of slots: sl(a,b,c) -- a-th end of b-th slot of c-th generation.
+    real(precision) :: slot(slG,slN,2)   ! Array of slots: sl(a,b,c) -- c-th end of b-th slot of a-th generation.
     type(SchottkyNumerics_Type) :: schottkyGroup    
     integer :: n(slG), j, k, i, g
 
