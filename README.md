@@ -1,6 +1,6 @@
 # SchottkyLib
 
-SchottkyLib is a tool for computation of analytical objects (meromorphic functions, differentials of different orders, spinors, etc) on real hyperelliptic curves using Schottky uniformization. 
+SchottkyLib is a tool for computation of analytical objects (meromorphic functions, differentials of various orders, spinors, etc) on real hyperelliptic curves using Schottky uniformization. 
 
 *Real hyperelliptic curve* (over the complex numbers) is a compact curve with affine part given by the equation $y^2 = P(x),~(x,y)\in\mathbb{C}^2$, where $P(x)$ is a real polynomial without multiple roots. Computations with such curves and their moduli space arise in numerous applications, such as Chebyshev optimization (computation of multiband filters using Chebyshev ansatz, computation of Chebyshev polynomials for several intervals), finding algebro-geometric solutions of nonlinear partial differential equations, general relativity theory, description of magnetic states in planar magnetic nanoelements, simulation of the water flow under a stepped dam, and others. 
 
