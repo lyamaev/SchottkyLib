@@ -36,7 +36,7 @@ public Traversal_Interface, TraversalParameters_Type, Traversal_BogatyrevAlg, Tr
 integer, parameter :: maxLen = 10000   ! Max length of branch. All nodes S: |S|>maxLen are excluded from traversal.
 
 interface 
-    function Term_Interface(u, z)
+    pure function Term_Interface(u, z)
         import :: precision
         complex(precision), intent(in) :: u(:)
         real(precision), intent(in) :: z(:)
@@ -45,7 +45,7 @@ interface
 end interface
 
 interface 
-    function Operation_Interface(arg1, arg2)
+    pure function Operation_Interface(arg1, arg2)
         import :: precision
         complex(precision), intent(in) :: arg1(:), arg2(size(arg1))
         complex(precision) :: Operation_Interface(size(arg1))
@@ -65,7 +65,7 @@ type :: TraversalParameters_Type
 end type TraversalParameters_Type
 
 interface 
-    function Traversal_Interface(schottkyGroup, params)
+    pure function Traversal_Interface(schottkyGroup, params)
         import :: precision, SchottkyGroup_Type, TraversalParameters_Type
         class(SchottkyGroup_Type), intent(in) :: schottkyGroup
         type(TraversalParameters_Type), intent(in) :: params
@@ -75,7 +75,7 @@ end interface
 
 contains
 
-function Traversal_BogatyrevAlg(schottkyGroup, params) result(res)
+pure function Traversal_BogatyrevAlg(schottkyGroup, params) result(res)
 ! Bogatyrev's algorithm. Implementation is based on depth-first search and lexicographical order.
     class(SchottkyGroup_Type), intent(in) :: schottkyGroup
     type(TraversalParameters_Type), intent(in) :: params
@@ -120,7 +120,7 @@ function Traversal_BogatyrevAlg(schottkyGroup, params) result(res)
 end function Traversal_BogatyrevAlg
 
 
-function Traversal_NewAlg(schottkyGroup, params) result(res)   
+pure function Traversal_NewAlg(schottkyGroup, params) result(res)   
     class(SchottkyGroup_Type), intent(in) :: schottkyGroup
     type(TraversalParameters_Type), intent(in) :: params
     complex(precision) :: res(size(params%idTransformTerm))
