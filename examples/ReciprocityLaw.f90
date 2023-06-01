@@ -25,9 +25,9 @@ program ReciprocityLaw
     lhs = schottkyGroup%ExpIntEta([schottkyGroup%S(j,a), a], z, w)
 
     ! rhs(1) = $\exp(\int_\infty^{z} \zeta_j)$,  rhs(2) = $\exp(\int_\infty^{w} \zeta_j)$.
-    rhs = schottkyGroup%ExpIntZetaJ(j, [cmplx(z,0,p), cmplx(w,0,p)])
+    rhs = schottkyGroup%ExpIntZetaJ(j, cmplx([z,w], 0, p))
 
-    print *, 'LHS and RHS of reciprocity law:', log(real([lhs(1)/lhs(2), rhs(1)/rhs(2)], kind=4))
+    print *, 'LHS and RHS of reciprocity law:', log(real([lhs(1)/lhs(2), rhs(1)/rhs(2)], kind = 4))
 
 ! Output:
 ! LHS and RHS of reciprocity law:  0.8132047      0.8132047 
