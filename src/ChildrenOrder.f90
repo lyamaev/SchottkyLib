@@ -27,15 +27,15 @@ function ChildrenOrder(a, eps) result(children)
     real(precision) :: L(-a%g:a%g,-a%g:a%g)   ! L(j,t) -- estimate of $f(S_{-j}T)/f(T)$.
     real(precision) :: K(-a%g:a%g)            ! K(t) -- estimate of $\sum_{S: S>T} f(S)/f(T)$.
     real(precision) :: M(-a%g:a%g,-a%g:a%g)   ! M(j,t) := L(-j,t)(K(t)+1).
-    real(precision) :: p(-1:1,-a%g:a%g)       ! p(\pm1,j) -- intersection points $C_j\cap\R$.
+    real(precision) :: ip(-1:1,-a%g:a%g)      ! ip(\pm1,j) -- intersection points $C_j\cap\R$.
     real(precision) :: sumOfDiamsEstimate     ! Estimate of $\sum_{S\ne\id} diam(S\cF)$.
     real(precision) :: leftmostRight(a%g), rightPrev, lambda(a%g), lambdaMax, gamma(a%g), h(-a%g:a%g,1:a%g)
 
     associate(g => a%g, c => a%c, r => a%r, sigma => a%sigma)	
-        ! Generate p(\pm1,j) := $p^\pm_j$ -- intersection points of $C_j$ with real line. If $\sigma_j = -1$ then 
+        ! Generate ip(\pm1,j) := $p^\pm_j$ -- intersection points of $C_j$ with real line. If $\sigma_j = -1$ then 
         ! circle $C_j$ is not uniqly determined by moduli, and so intersection points $p^\pm_j$.
         forall(j = 1:g, sigma(j) == 1) 
-            p(-1,j) = c(j) - r(j);  p(+1,j) = c(j) + r(j)
+            ip(-1,j) = c(j) - r(j);  ip(+1,j) = c(j) + r(j)
         end forall
         if (any(sigma(1:g) == -1)) then
             rightPrev = 0
@@ -44,25 +44,25 @@ function ChildrenOrder(a, eps) result(children)
                     leftmostRight(j) = a%S(j,-rightPrev)  ! Leftmost position of $p^+_j$.
                     rightPrev = leftmostRight(j)
                 else 
-                    rightPrev = p(+1,j)
+                    rightPrev = ip(+1,j)
                 end if
             end do
             do j = g,1,-1
                 if (sigma(j) == -1) then
                     if (j == g) then 
-                        p(+1,j) = leftmostRight(g) + 1
+                        ip(+1,j) = leftmostRight(g) + 1
                     else
-                        p(+1,j) = (leftmostRight(j) + p(-1,j+1))/2
+                        ip(+1,j) = (leftmostRight(j) + ip(-1,j+1))/2
                     end if
-                    p(-1,j) = a%S(j, -p(+1,j))
+                    ip(-1,j) = a%S(j, -ip(+1,j))
                 end if
             end do
         end if
-        p(+1,-g:-1) = -p(-1,g:1:-1);  p(-1,-g:-1) = -p(+1,g:1:-1)
+        ip(+1,-g:-1) = -ip(-1,g:1:-1);  ip(-1,-g:-1) = -ip(+1,g:1:-1)
 
         ! Compute L(j,t) and lambda(t) := sum(L(:,t)). Schmies' estimate is only applicable, if max(lambda(:))<1.
         forall(j = -g:g, t = -g:g, j /= t .and. j /= 0 .and. t /= 0) 
-            L(j,t) = (r(j) / (p(sign(1,j-t),t) - c(j)))**2
+            L(j,t) = (r(j) / (ip(sign(1,j-t),t) - c(j)))**2
         end forall
         forall(j = -g:g) 
             L(j,j) = 0;  L(j,0) = 0;  L(0,j) = 0
@@ -76,18 +76,18 @@ function ChildrenOrder(a, eps) result(children)
         else
             ! $\gamma_k$ is an upper estimate of $\sum_{l: SS_l>S_l}\diam(SS_l\cF)/diam(S\cF)$, where 
             ! $k$ is an index of the rightmost letter of $S\ne\id$, $\cF$ -- fundamental domain.
-            forall(j = 2:g-1) gamma(j) = ((p(-1,j+1) - p(-1,j)) / (p(-1,j+1) - p(+1,j))) / &
-                                         ((p(+1,j-1) - p(-1,j)) / (p(+1,j-1) - p(+1,j)))
-            gamma(1) = ((p(-1,2) - p(-1,1)) / (p(-1,2) - p(+1,1))) / &
-                       ((p(+1,-1) - p(-1,1)) / (p(+1,-1) - p(+1,1)))    
-            gamma(g) = ((p(-1,-g) - p(-1,g)) / (p(-1,-g) - p(+1,g))) / &
-                       ((p(+1,g-1) - p(-1,g)) / (p(+1,g-1) - p(+1,g)))	
+            forall(j = 2:g-1) gamma(j) = ((ip(-1,j+1) - ip(-1,j)) / (ip(-1,j+1) - ip(+1,j))) / &
+                                         ((ip(+1,j-1) - ip(-1,j)) / (ip(+1,j-1) - ip(+1,j)))
+            gamma(1) = ((ip(-1,2) - ip(-1,1)) / (ip(-1,2) - ip(+1,1))) / &
+                       ((ip(+1,-1) - ip(-1,1)) / (ip(+1,-1) - ip(+1,1)))    
+            gamma(g) = ((ip(-1,-g) - ip(-1,g)) / (ip(-1,-g) - ip(+1,g))) / &
+                       ((ip(+1,g-1) - ip(-1,g)) / (ip(+1,g-1) - ip(+1,g)))	
 
             ! Upper estimate of $\sum_{S\ne\id} diam(S\cF)$.
-            sumOfDiamsEstimate = (sqrt(maxval(gamma)) + 1) * sum(p(+1,1:g) - p(-1,1:g))
+            sumOfDiamsEstimate = (sqrt(maxval(gamma)) + 1) * sum(ip(+1,1:g) - ip(-1,1:g))
 
             forall(j = -g:g, t = 1:g, j /= t .and. j /= 0) 
-                h(j,t) = (p(+1,j) - p(-1,j)) / (4*(p(sign(1,j-t),t) - p(-1,j))*(p(sign(1,j-t),t) - p(+1,j)))
+                h(j,t) = (ip(+1,j) - ip(-1,j)) / (4*(ip(sign(1,j-t),t) - ip(-1,j))*(ip(sign(1,j-t),t) - ip(+1,j)))
             end forall
             forall(t = -g:g) h(t,t) = 0
             h(0,1:g) = 0
