@@ -28,7 +28,7 @@ program RamificationPts
     ramInAlgM = ramInAlgM * x(1)/ramInAlgM(1)   ! Stretch to the same scale as x(:).
 
     ! Check that ramification points in algebraic model for constructed Schottky group coincide with x(:).
-    print *, 'Ramification points in algebraic model:', real(ramInAlgM, kind=4)
+    print *, 'Ramification points in algebraic model:', real(ramInAlgM, kind = 4)
 
 ! Output:
 ! Ramification points in algebraic model:  0.1000000   0.2000000   1.000000   1.300000   1.500000   2.900000    
